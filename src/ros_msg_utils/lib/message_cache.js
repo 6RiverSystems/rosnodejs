@@ -39,6 +39,7 @@ cmakePaths.forEach((cmakePath) => {
       // If the message package has been found in a previous workspace,
       // don't overwrite it now. This is critical to enabling ws overlays.
       if (!packagePaths.hasOwnProperty(msgPackage)) {
+        console.log(`Loading messages from ${path.join(dirPath, msgPackage)}`);
         packagePaths[msgPackage] = path.join(dirPath, msgPackage, '_index.js');
       }
     });
