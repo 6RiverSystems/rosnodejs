@@ -320,7 +320,7 @@ class SubscriberImpl extends EventEmitter {
     });
 
     // open the socket at the provided address, port
-    client.connect({port: port, host: address, autoSelectFamily: false}, () => {
+    client.connect(port, address, () => {
       if (this.isShutdown()) {
         client.end();
         return;
