@@ -547,7 +547,7 @@ describe('Protocol Test', () => {
 
       sub.on('registered', () => {
 
-        net.Socket.prototype.connect = function(options, callback) {
+        net.Socket.prototype.connect = function(port, address, callback) {
           process.nextTick(() => {
             callback();
           });
