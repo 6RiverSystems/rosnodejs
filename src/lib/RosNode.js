@@ -115,7 +115,7 @@ class RosNode extends EventEmitter {
     if (!subImpl) {
       subImpl = new SubscriberImpl(options, this);
       this._subscribers[topic] = subImpl;
-      this.first = true;
+      this.firstSubscriber = true;
     }
 
     const sub = new Subscriber(subImpl);
