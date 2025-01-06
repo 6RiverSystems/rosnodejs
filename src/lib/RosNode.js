@@ -111,14 +111,19 @@ class RosNode extends EventEmitter {
   subscribe(options, callback) {
     let topic = options.topic;
     let subImpl = this._subscribers[topic];
+    let firstSubscriber = false;
     if (!subImpl) {
       subImpl = new SubscriberImpl(options, this);
       this._subscribers[topic] = subImpl;
+      this.first = true;
     }
 
     const sub = new Subscriber(subImpl);
     if (callback && typeof callback === 'function') {
       sub.on('message', callback);
+    }
+    if (!firstSubscriber && subImpl._latching && subImpl._lastMessage){
+        sub.emit('message', subImpl._lastMessage)
     }
 
     return sub;

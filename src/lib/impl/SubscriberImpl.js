@@ -85,6 +85,11 @@ class SubscriberImpl extends EventEmitter {
     this._pendingPubClients = {};
 
     this._state = REGISTERING;
+
+    this._latching = undefined;
+
+    this._lastMessage = undefined;
+  
     this._register();
   }
 
@@ -389,6 +394,10 @@ class SubscriberImpl extends EventEmitter {
     // remove client from pending map now that it's validated
     delete this._pendingPubClients[client.nodeUri];
 
+    if (header.latching) {
+      this._latching = true;
+    }
+
     // pipe all future messages to _handleMessage
     client.$deserializer.on('message', this._handleMessage.bind(this));
 
@@ -416,6 +425,9 @@ class SubscriberImpl extends EventEmitter {
   _handleMsgQueue(msgQueue) {
     try {
       msgQueue.forEach((msg) => {
+        if(this._latching){
+          this._lastMessage = this._messageHandler.deserialize(msg);
+        }
         this.emit('message', this._messageHandler.deserialize(msg));
       });
     }
