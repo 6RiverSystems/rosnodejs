@@ -740,7 +740,7 @@ describe('Protocol Test', () => {
       });
     });
 
-    it.only('2 Subscribers on Same Latched Topic subscribing at different times ', function(done) {
+    it('2 Subscribers on Same Latched Topic subscribing at different times ', function(done) {
       this.slow(1000);
       const nh = rosnodejs.nh;
 
