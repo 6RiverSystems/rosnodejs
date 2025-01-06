@@ -739,6 +739,30 @@ describe('Protocol Test', () => {
         });
       });
     });
+
+    it('2 Subscribers on Same Latched Topic subscribing at different times ', function(done) {
+      this.slow(1000);
+      const nh = rosnodejs.nh;
+
+      let msg1;
+      const sub1 = nh.subscribe(topic, msgType, (msg) => {
+        msg1 = msg.data;
+        let msg2;
+        const sub2 = nh.subscribe(topic, msgType, (msg) => {
+          expect(sub1._impl.listenerCount('connection')).to.equal(2);
+          msg2 = msg.data;
+          expect(msg1).to.equal(1);
+          expect(msg1).to.equal(msg2);
+          done()
+        });
+      });
+
+      expect(sub1._impl.listenerCount('connection')).to.equal(1);
+
+      const pub = nh.advertise(topic, msgType, {latching: true});
+
+      pub.publish({data: 1});
+    });
   });
 
   describe('Service', () => {

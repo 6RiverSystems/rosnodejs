@@ -85,6 +85,11 @@ class SubscriberImpl extends EventEmitter {
     this._pendingPubClients = {};
 
     this._state = REGISTERING;
+
+    this._latching = undefined;
+
+    this._lastMessage = undefined;
+  
     this._register();
   }
 
@@ -128,6 +133,23 @@ class SubscriberImpl extends EventEmitter {
   getNode() {
     return this._nodeHandle;
   }
+
+  /**
+   * Check if this subscriber is connected to a latched topic
+   * @returns {boolean}
+   */
+  getLatching() {
+    return this._latching;
+  }
+
+  /**
+   * Return the last message received
+   * @returns {any}
+   */
+  getLastMessage() {
+    return this._lastMessage;
+  }
+
 
   /**
    * Clears and closes all client connections for this subscriber.
@@ -389,6 +411,10 @@ class SubscriberImpl extends EventEmitter {
     // remove client from pending map now that it's validated
     delete this._pendingPubClients[client.nodeUri];
 
+    if (header.latching) {
+      this._latching = true;
+    }
+
     // pipe all future messages to _handleMessage
     client.$deserializer.on('message', this._handleMessage.bind(this));
 
@@ -416,6 +442,9 @@ class SubscriberImpl extends EventEmitter {
   _handleMsgQueue(msgQueue) {
     try {
       msgQueue.forEach((msg) => {
+        if (this.getLatching()) {
+          this._lastMessage = this._messageHandler.deserialize(msg);
+        }
         this.emit('message', this._messageHandler.deserialize(msg));
       });
     }

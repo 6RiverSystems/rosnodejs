@@ -111,14 +111,21 @@ class RosNode extends EventEmitter {
   subscribe(options, callback) {
     let topic = options.topic;
     let subImpl = this._subscribers[topic];
+    let firstSubscriber = false;
     if (!subImpl) {
       subImpl = new SubscriberImpl(options, this);
       this._subscribers[topic] = subImpl;
+      firstSubscriber = true;
     }
 
     const sub = new Subscriber(subImpl);
     if (callback && typeof callback === 'function') {
       sub.on('message', callback);
+    }
+    // Duplicate subscribers wont get a latched 'message' emit from the existing subscriber impl.
+    // This will forcibly send an emit if the topic is latched and has already seen an incoming message
+    if (!firstSubscriber && subImpl.getLatching() && subImpl.getLastMessage()) {
+        sub.emit('message', subImpl.getLastMessage())
     }
 
     return sub;
