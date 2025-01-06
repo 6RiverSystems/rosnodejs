@@ -135,6 +135,23 @@ class SubscriberImpl extends EventEmitter {
   }
 
   /**
+   * Check if this subscriber is connected to a latched topic
+   * @returns {boolean}
+   */
+  getLatching() {
+    return this._latching;
+  }
+
+  /**
+   * Return the last message received
+   * @returns {any}
+   */
+  getLastMessage() {
+    return this._lastMessage;
+  }
+
+
+  /**
    * Clears and closes all client connections for this subscriber.
    */
   shutdown() {
@@ -425,7 +442,7 @@ class SubscriberImpl extends EventEmitter {
   _handleMsgQueue(msgQueue) {
     try {
       msgQueue.forEach((msg) => {
-        if(this._latching){
+        if (this.getLatching()) {
           this._lastMessage = this._messageHandler.deserialize(msg);
         }
         this.emit('message', this._messageHandler.deserialize(msg));
